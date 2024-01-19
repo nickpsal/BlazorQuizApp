@@ -1,0 +1,108 @@
+﻿@page "/quiz1"
+@rendermode InteractiveServer
+
+<PageTitle>Weather</PageTitle>
+<h3>Quiz1</h3>
+
+@if (quizData == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card-body">
+        @foreach (var question in quizData)
+        {
+            <div> 
+                @question.question <br />
+                @foreach(var answer in question.Answers)
+                {
+                    <label><input type="radio" checked="@IsOptionSelected(question.question, answer)" @onchange='() => SetSelectedChoice(question.question, answer)' />@answer</label>
+                    <br />
+                }
+                @if (Messages.Count != 0)
+                {
+                    <div>@Messages[question.question]</div>
+                    <br />
+                }
+            </div>
+        }
+        <button @onclick="HandleSubmit">Submit</button>
+    </div>
+}
+
+@code {
+    private int CorrectAnswersCounter = 0;
+    public List<QuizData> quizData { get; set; } = new();
+    private Dictionary<string, string> selectedChoices = new Dictionary<string, string>();
+    private Dictionary<string, string> Messages = new Dictionary<string, string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadQuestions();
+        InitializeSelectedChoice();
+    }
+
+    private void InitializeSelectedChoice()
+    {
+        foreach (var question in quizData)
+        {
+            selectedChoices[question.question] = "";
+        }
+    }
+
+    private bool IsOptionSelected(string question, string option)
+    {
+        return selectedChoices[question] == option;
+    }
+
+    private void SetSelectedChoice(string question, string option)
+    {
+        selectedChoices[question] = option;
+    }
+
+    private void initializeMessages()
+    {
+        foreach (var question in quizData)
+        {
+            Messages[question.question] = "";
+        }
+    }
+
+    protected void HandleSubmit()
+    {
+        initializeMessages();
+        checkAnswers();
+    }
+
+    private void checkAnswers()
+    {
+        foreach (var question in quizData)
+        {
+            if (question.correct == selectedChoices[question.question])
+            {
+                Messages[question.question] = $"Your Answer is Correct. {question.correct}";
+                CorrectAnswersCounter++;
+            }else
+            {
+                Messages[question.question] = $"Your Answer was Incorrect. The Correct Answer is {question.correct}";
+            }
+        }
+    }
+
+    private async Task LoadQuestions()
+    {
+        string path = "Data/quiz.dat";
+        // Use StreamReaderAsync to read the contents asynchronously.
+        using (StreamReader reader = new StreamReader(path))
+        {
+            // Read the contents asynchronously.
+            string json = await reader.ReadToEndAsync();
+            // Create a JsonSerializerOptions object to specify the options for deserializing the JSON data.
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.PropertyNameCaseInsensitive = true;
+            // Deserialize the JSON data into a strongly typed object using the JsonSerializer.Deserialize<T>() method.
+            quizData = JsonSerializer.Deserialize<List<QuizData>>(json, options)!;
+        }
+    }
+}
