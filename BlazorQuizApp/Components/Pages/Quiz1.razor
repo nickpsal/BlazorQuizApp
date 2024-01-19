@@ -81,11 +81,11 @@ else
         {
             if (question.correct == selectedChoices[question.question])
             {
-                Messages[question.question] = $"Your Answer is Correct. {question.correct}";
+                Messages[question.question] = "Your Answer is Correct.";
                 CorrectAnswersCounter++;
             }else
             {
-                Messages[question.question] = $"Your Answer was Incorrect. The Correct Answer is {question.correct}";
+                Messages[question.question] = "Your Answer was Incorrect.";
             }
         }
     }
