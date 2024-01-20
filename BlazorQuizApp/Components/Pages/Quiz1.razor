@@ -23,16 +23,22 @@ else
                 @if (Messages.Count != 0)
                 {
                     <div>@Messages[question.question]</div>
-                    <br />
                 }
             </div>
         }
-        <button @onclick="HandleSubmit">Submit</button>
+        @if (!isFinished)
+        {
+            <button @onclick="HandleSubmit">Submit</button>
+            <button @onclick="HandleClear">Clear</button>
+        }else {
+            <button @onclick="HandleClear">Retry</button>
+        }
     </div>
 }
 
 @code {
     private int CorrectAnswersCounter = 0;
+    private bool isFinished = false;
     public List<QuizData> quizData { get; set; } = new();
     private Dictionary<string, string> selectedChoices = new Dictionary<string, string>();
     private Dictionary<string, string> Messages = new Dictionary<string, string>();
@@ -73,6 +79,17 @@ else
     {
         initializeMessages();
         checkAnswers();
+        isFinished = true;
+    }
+
+    protected void HandleClear()
+    {
+        isFinished = false;
+        initializeMessages();
+        foreach(var question in quizData)
+        {
+            SetSelectedChoice(question.question, "");
+        }
     }
 
     private void checkAnswers()
