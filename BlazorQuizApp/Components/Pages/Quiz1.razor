@@ -46,6 +46,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadQuestions();
+        ShuffleQuestions();
+        ShuffleAnswers();
         InitializeSelectedChoice();
     }
 
@@ -85,6 +87,8 @@ else
     protected void HandleClear()
     {
         isFinished = false;
+        ShuffleQuestions();
+        ShuffleAnswers();
         initializeMessages();
         foreach(var question in quizData)
         {
@@ -120,6 +124,21 @@ else
             options.PropertyNameCaseInsensitive = true;
             // Deserialize the JSON data into a strongly typed object using the JsonSerializer.Deserialize<T>() method.
             quizData = JsonSerializer.Deserialize<List<QuizData>>(json, options)!;
+        }
+    }
+
+    private void ShuffleQuestions()
+    {
+        Random random = new Random();
+        quizData = quizData.OrderBy(x => random.Next()).ToList();
+    }
+
+    private void ShuffleAnswers()
+    {
+        Random random = new Random();
+        foreach(var question in quizData)
+        {
+            question.Answers = question.Answers.OrderBy(x => random.Next()).ToList();
         }
     }
 }
