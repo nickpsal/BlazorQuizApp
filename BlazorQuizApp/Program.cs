@@ -1,4 +1,5 @@
 using BlazorQuizApp.Components;
+using BlazorQuizApp.Services;
 
 namespace BlazorQuizApp
 {
@@ -11,6 +12,9 @@ namespace BlazorQuizApp
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+
+            //Services
+            builder.Services.AddScoped<IReadJSON, ReadJSON>();
 
             var app = builder.Build();
 

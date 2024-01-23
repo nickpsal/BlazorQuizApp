@@ -1,5 +1,6 @@
 ﻿@page "/quiz"
 @rendermode InteractiveServer
+@inject IReadJSON readJson
 
 <PageTitle>Weather</PageTitle>
 <h3>Quiz</h3>
@@ -37,6 +38,7 @@ else
 }
 
 @code {
+    private string path = "Data/quiz.dat";
     private int CorrectAnswersCounter = 0;
     private bool isFinished = false;
     public List<QuizData> quizData { get; set; } = new();
@@ -45,9 +47,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadQuestions();
-        ShuffleQuestions();
-        ShuffleAnswers();
+        quizData = await readJson.LoadQuestions(path);
+        quizData = readJson.ShuffleQuestions(quizData);
+        quizData = readJson.ShuffleAnswers(quizData);
         InitializeSelectedChoice();
     }
 
@@ -86,13 +88,14 @@ else
 
     protected void HandleClear()
     {
-        isFinished = false;
-        ShuffleQuestions();
-        ShuffleAnswers();
-        initializeMessages();
-        foreach(var question in quizData)
+        foreach (var question in quizData)
         {
-            SetSelectedChoice(question.question, "");
+            if (!String.IsNullOrEmpty(selectedChoices[question.question]))
+            {
+                SetSelectedChoice(question.question, "");
+                initializeMessages();
+                break;
+            }
         }
     }
 
@@ -111,34 +114,34 @@ else
         }
     }
 
-    private async Task LoadQuestions()
+    private async Task<List<QuizData>> LoadQuestions(string path)
     {
-        string path = "Data/quiz.dat";
-        // Use StreamReaderAsync to read the contents asynchronously.
-        using (StreamReader reader = new StreamReader(path))
+        try
         {
-            // Read the contents asynchronously.
-            string json = await reader.ReadToEndAsync();
-            // Create a JsonSerializerOptions object to specify the options for deserializing the JSON data.
-            JsonSerializerOptions options = new JsonSerializerOptions();
-            options.PropertyNameCaseInsensitive = true;
-            // Deserialize the JSON data into a strongly typed object using the JsonSerializer.Deserialize<T>() method.
-            quizData = JsonSerializer.Deserialize<List<QuizData>>(json, options)!;
-        }
-    }
-
-    private void ShuffleQuestions()
-    {
-        Random random = new Random();
-        quizData = quizData.OrderBy(x => random.Next()).ToList();
-    }
-
-    private void ShuffleAnswers()
-    {
-        Random random = new Random();
-        foreach(var question in quizData)
+            // Use StreamReaderAsync to read the contents asynchronously.
+            using (StreamReader reader = new StreamReader(path))
+            {
+                // Read the contents asynchronously.
+                string json = await reader.ReadToEndAsync();
+                // Create a JsonSerializerOptions object to specify the options for deserializing the JSON data.
+                JsonSerializerOptions options = new JsonSerializerOptions();
+                options.PropertyNameCaseInsensitive = true;
+                // Deserialize the JSON data into a strongly typed object using the JsonSerializer.Deserialize<T>() method.
+                return JsonSerializer.Deserialize<List<QuizData>>(json, options)!;
+            }
+        } catch (FileNotFoundException)
         {
-            question.Answers = question.Answers.OrderBy(x => random.Next()).ToList();
+            Console.WriteLine("Δεν Βρέθηκε το Αρχείο");
+            return new List<QuizData>();
+        } catch (IOException ex)
+        {
+            // Handle other I/O exceptions
+            Console.WriteLine($"An error occurred: {ex.Message}");
+            return new List<QuizData>();
+        } catch (Exception exp)
+        {
+            Console.WriteLine($"Σφάλμα: {exp}");
+            return new List<QuizData>();
         }
     }
 }
