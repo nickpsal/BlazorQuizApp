@@ -5,7 +5,7 @@
 
 <h3>QuizList</h3>
 
-@if (quizList!.Count == 0)
+@if (quizList.Count == 0)
 {
     <p><em>No quiz on the folder</em></p>
 }else
@@ -36,7 +36,7 @@
 }
 
 @code {
-    private List<string>? quizList;
+    private List<string> quizList = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
