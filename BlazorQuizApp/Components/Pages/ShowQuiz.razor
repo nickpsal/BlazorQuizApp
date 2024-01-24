@@ -1,13 +1,14 @@
-﻿@page "/quiz"
+﻿@page "/showquiz"
+@page "/showquiz/{quiz}"
 @rendermode InteractiveServer
 @inject IReadJSON readJson
 
 <PageTitle>Weather</PageTitle>
 <h3>Quiz</h3>
 
-@if (quizData == null)
+@if (quizData.Count == 0)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Empty quiz</em></p>
 }
 else
 {
@@ -38,7 +39,8 @@ else
 }
 
 @code {
-    private string path = "Data/quiz.dat";
+    [Parameter]
+    public string? quiz { get; set; }
     private int CorrectAnswersCounter = 0;
     private bool isFinished = false;
     public List<QuizData> quizData { get; set; } = new();
@@ -47,6 +49,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        string path = $"Data/{quiz}.dat";
         quizData = await readJson.LoadQuestions(path);
         quizData = readJson.ShuffleQuestions(quizData);
         quizData = readJson.ShuffleAnswers(quizData);

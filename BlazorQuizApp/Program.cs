@@ -15,6 +15,7 @@ namespace BlazorQuizApp
 
             //Services
             builder.Services.AddScoped<IReadJSON, ReadJSON>();
+            builder.Services.AddScoped<IQuizList, QuizList>();
 
             var app = builder.Build();
 

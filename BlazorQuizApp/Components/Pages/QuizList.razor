@@ -1,0 +1,50 @@
+﻿@page "/quizlist"
+@rendermode InteractiveServer
+@inject IQuizList quizlist
+@inject NavigationManager navManager;
+
+<h3>QuizList</h3>
+
+@if (quizList!.Count == 0)
+{
+    <p><em>No quiz on the folder</em></p>
+}else
+{
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Quiz Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var quiz in quizList)
+                {
+                    <tr>
+                        <td>
+                            @quiz
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary" @onclick="() => loadquiz(quiz)"><FontAwesomeIcon Icon="@FontAwesome.Play" /></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<string>? quizList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        quizList = await quizlist.GetFilesAsync();
+    }
+
+    private void loadquiz(string quiz)
+    {
+        navManager.NavigateTo($"/showquiz/{quiz}");
+    }
+}
